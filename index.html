@@ -5,126 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>miDNI Pro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: #000; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         .phone { width: 100%; max-width: 414px; height: 100vh; background: #fff; position: relative; }
 
-        /* Pantallas */
-        .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; }
-        .active { display: block; }
+        .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: 100% 100%; background-position: center; }
+        .active { display: block !important; }
 
-        /* 1. FORMULARIO */
-        #sc-setup { display: block; background: #f2f2f7; padding: 60px 20px; z-index: 1000; overflow-y: auto; }
-        .card { background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-        h2 { margin-bottom: 20px; color: #1a2b4e; text-align: center; }
-        label { display: block; font-size: 12px; font-weight: bold; color: #8e8e93; margin-bottom: 5px; text-transform: uppercase; }
-        input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #d1d1d6; border-radius: 10px; font-size: 16px; }
-        .btn-entrar { background: #1a2b4e; color: #fff; width: 100%; padding: 20px; border: none; border-radius: 14px; font-weight: bold; font-size: 18px; cursor: pointer; }
+        /* Pantalla 1: Formulario */
+        #sc-setup { display: block; background: #f2f2f7; padding: 50px 20px; z-index: 100; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        .btn-entrar { background: #1a2b4e; color: #fff; width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; }
 
-        /* 2. CARGA (Imagen de Policía Nacional) */
+        /* Pantalla 2: Carga */
         #sc-loading { background-image: url('https://files.oaiusercontent.com/file-ea79148d-d82b-48df-bfc8-e536f32225b2'); background-color: #fff; }
 
-        /* 3. OPCIONES (Imagen con los 3 bloques azules) */
+        /* Pantalla 3: Opciones */
         #sc-options { background-image: url('https://files.oaiusercontent.com/file-9ddf0b2d-8e95-4122-9c69-9a21836a8aef'); }
-        
-        /* BOTONES INVISIBLES SOBRE LOS BLOQUES AZULES */
-        .btn-invisible { position: absolute; width: 85%; left: 7.5%; height: 14%; background: rgba(255,0,0,0); border: none; cursor: pointer; }
-        .opt-1 { top: 54%; }
-        .opt-2 { top: 68.5%; }
-        .opt-3 { top: 83%; }
+        .btn-inv { position: absolute; width: 85%; left: 7.5%; height: 12%; background: rgba(0,0,0,0); border: none; }
 
-        /* 4. DNI FINAL (Imagen de Carmen) */
+        /* Pantalla 4: DNI */
         #sc-dni { background-image: url('https://files.oaiusercontent.com/file-0ca121b2-7247-40d3-84c7-8d0c9a8ef62e'); }
-        
-        /* Superposición de tus datos sobre Carmen */
-        .user-photo { position: absolute; top: 15.3%; left: 8.5%; width: 27%; height: 18.5%; background: #fff; overflow: hidden; border-radius: 2px; }
-        .user-photo img { width: 100%; height: 100%; object-fit: cover; }
-        .user-data { position: absolute; color: #1a2b4e; font-weight: 700; font-size: 17px; pointer-events: none; text-transform: uppercase; }
-        
-        /* Coordenadas ajustadas */
-        #out-dni { top: 43.8%; left: 11%; }
-        #out-ape { top: 51.1%; left: 11%; }
-        #out-nom { top: 58.5%; left: 11%; }
-        #out-nac { top: 65.8%; left: 11%; }
+        .u-foto { position: absolute; top: 15.3%; left: 8.5%; width: 27%; height: 18.5%; background: #eee; }
+        .u-foto img { width: 100%; height: 100%; object-fit: cover; }
+        .u-txt { position: absolute; color: #1a2b4e; font-weight: 700; font-size: 17px; pointer-events: none; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="phone">
     <div id="sc-setup" class="screen active">
-        <div class="card">
-            <h2>miDNI Setup</h2>
-            <label>Sube tu foto</label>
-            <input type="file" id="in-foto" accept="image/*">
-            <label>Nombre</label>
-            <input type="text" id="in-nom" placeholder="NOMBRE">
-            <label>Apellidos</label>
-            <input type="text" id="in-ape" placeholder="APELLIDOS">
-            <label>Número DNI</label>
-            <input type="text" id="in-dni" placeholder="00000000X">
-            <label>Fecha Nacimiento</label>
-            <input type="text" id="in-nac" value="01 / 01 / 2000">
-            <button class="btn-entrar" id="btn-trigger">CONFIGURAR Y ENTRAR</button>
+        <div style="background:#fff; padding:20px; border-radius:15px;">
+            <input type="file" id="i-foto" accept="image/*">
+            <input type="text" id="i-nom" placeholder="NOMBRE">
+            <input type="text" id="i-ape" placeholder="APELLIDOS">
+            <input type="text" id="i-dni" placeholder="DNI">
+            <button class="btn-entrar" onclick="procesar()">ENTRAR</button>
         </div>
     </div>
 
     <div id="sc-loading" class="screen"></div>
 
     <div id="sc-options" class="screen">
-        <button class="btn-invisible opt-1" onclick="irAlDNI()"></button>
-        <button class="btn-invisible opt-2" onclick="irAlDNI()"></button>
-        <button class="btn-invisible opt-3" onclick="irAlDNI()"></button>
+        <button class="btn-inv" style="top:54%" onclick="irFin()"></button>
+        <button class="btn-inv" style="top:68%" onclick="irFin()"></button>
+        <button class="btn-inv" style="top:83%" onclick="irFin()"></button>
     </div>
 
     <div id="sc-dni" class="screen">
-        <div class="user-photo"><img id="res-foto"></div>
-        <div class="user-data" id="out-dni"></div>
-        <div class="user-data" id="out-ape"></div>
-        <div class="user-data" id="out-nom"></div>
-        <div class="user-data" id="out-nac"></div>
+        <div class="u-foto"><img id="r-foto"></div>
+        <div class="u-txt" style="top:43.8%; left:11%" id="r-dni"></div>
+        <div class="u-txt" style="top:51.1%; left:11%" id="r-ape"></div>
+        <div class="u-txt" style="top:58.5%; left:11%" id="r-nom"></div>
     </div>
 </div>
 
 <script>
-    const btnEntrar = document.getElementById('btn-trigger');
-
-    function cambiar(id) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+    function navega(id) {
+        // Forzamos el cambio ocultando y mostrando por ID directo
+        document.getElementById('sc-setup').style.display = 'none';
+        document.getElementById('sc-loading').style.display = 'none';
+        document.getElementById('sc-options').style.display = 'none';
+        document.getElementById('sc-dni').style.display = 'none';
+        
         document.getElementById(id).style.display = 'block';
     }
 
-    btnEntrar.addEventListener('click', function() {
-        const fotoFile = document.getElementById('in-foto').files[0];
-        if(!fotoFile) return alert("Sube una foto primero");
+    function procesar() {
+        const file = document.getElementById('i-foto').files[0];
+        
+        // Pasamos los textos primero
+        document.getElementById('r-nom').innerText = document.getElementById('i-nom').value;
+        document.getElementById('r-ape').innerText = document.getElementById('i-ape').value;
+        document.getElementById('r-dni').innerText = document.getElementById('i-dni').value;
 
-        // Asignar datos a las capas del DNI
-        document.getElementById('out-nom').innerText = document.getElementById('in-nom').value;
-        document.getElementById('out-ape').innerText = document.getElementById('in-ape').value;
-        document.getElementById('out-dni').innerText = document.getElementById('in-dni').value;
-        document.getElementById('out-nac').innerText = document.getElementById('in-nac').value;
+        // Si hay foto, la leemos, si no, saltamos igual para que no se quede en blanco
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('r-foto').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
 
-        const lector = new FileReader();
-        lector.onload = function(e) {
-            document.getElementById('res-foto').src = e.target.result;
-            
-            // 1. Mostrar pantalla de carga (la de Policía Nacional)
-            cambiar('sc-loading');
-
-            // 2. A los 1.5 segundos, mostrar las 3 opciones azules
-            setTimeout(() => {
-                cambiar('sc-options');
-            }, 1500);
-        };
-        lector.readAsDataURL(fotoFile);
-    });
-
-    function irAlDNI() {
-        // Transición rápida de carga antes del DNI
-        cambiar('sc-loading');
+        // LANZAR CARGA SI O SI
+        navega('sc-loading');
+        
         setTimeout(() => {
-            cambiar('sc-dni');
+            navega('sc-options');
+        }, 1500);
+    }
+
+    function irFin() {
+        navega('sc-loading');
+        setTimeout(() => {
+            navega('sc-dni');
         }, 800);
     }
 </script>
