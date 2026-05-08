@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>miDNI</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="miDNI">
+    
+    <style>
+        :root {
+            --azul-dni: #1a2b4e;
+            --azul-brillante: #3b82f6;
+            --fondo-gris: #f2f2f7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { 
+            background: #000; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 430px; /* Tamaño iPhone Pro Max */
+            height: 100vh;
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Pantallas */
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .active { display: block; }
+
+        /* PANTALLA 1: FORMULARIO (ESTILO IOS) */
+        #screen-setup { 
+            display: block; 
+            background: var(--fondo-gris); 
+            padding: 60px 20px 20px; 
+            z-index: 100; 
+            overflow-y: auto;
+        }
+        .ios-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        h2 { font-size: 22px; font-weight: 700; margin-bottom: 20px; color: #000; }
+        label { display: block; font-size: 13px; color: #8e8e93; margin-bottom: 5px; text-transform: uppercase; padding-left: 5px; }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 15px; 
+            border: 1px solid #d1d1d6; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            background: #fff;
+        }
+        .btn-entrar {
+            background: var(--azul-dni);
+            color: white;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* PANTALLA 2: CARGA (Tu foto de carga) */
+        #screen-loading { 
+            background-image: url('https://files.oaiusercontent.com/file-a3863a57-eac0-49a9-bfe4-c3c90c25873a');
+            background-color: white;
+        }
+
+        /* PANTALLA 3: OPCIONES (Tu foto de opciones) */
+        #screen-options { 
+            background-image: url('https://files.oaiusercontent.com/file-bb60ff67-0c47-4cdb-9c40-bee6ed97102d');
+            background-color: white;
+        }
+        
+        /* BOTONES INVISIBLES SOBRE OPCIONES */
+        .tap-zone {
+            position: absolute;
+            background: rgba(255,0,0,0); /* Cambia a 0.1 para verlos mientras pruebas */
+            width: 90%;
+            left: 5%;
+            height: 10%;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* PANTALLA 4: DNI FINAL (Foto Carmen) */
+        #screen-dni { 
+            background-image: url('https://files.oaiusercontent.com/file-0ca121b2-7247-40d3-84c7-8d0c9a8ef62e');
+            background-color: #101a33;
+        }
+
+        /* SUPERPOSICIÓN DE TUS DATOS */
+        .capa-foto {
+            position: absolute;
+            top: 15.3%; /* Ajustado para el iPhone */
+            left: 8.5%;
+            width: 27%;
+            height: 18.5%;
+            background: white;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .capa-foto img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .capa-texto {
+            position: absolute;
+            color: #1a2b4e;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 0.2px;
+            pointer-events: none;
+        }
+
+        /* Coordenadas para tapar a Carmen */
+        #out-dni { top: 43.8%; left: 11%; }
+        #out-ape { top: 51.1%; left: 11%; }
+        #out-nom { top: 58.5%; left: 11%; }
+        #out-nac { top: 65.8%; left: 11%; }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    
+    <div id="screen-setup" class="screen active">
+        <h2>Configuración miDNI</h2>
+        <div class="ios-card">
+            <label>Foto Obligatoria</label>
+            <input type="file" id="in-foto" accept="image/*">
+            
+            <label>Nombre</label>
+            <input type="text" id="in-nom" placeholder="Escribe tu nombre">
+            
+            <label>Apellidos</label>
+            <input type="text" id="in-ape" placeholder="Escribe tus apellidos">
+            
+            <label>Número DNI</label>
+            <input type="text" id="in-dni" placeholder="12345678X">
+            
+            <label>Fecha Nacimiento</label>
+            <input type="text" id="in-nac" value="03 / 09 / 2001">
+        </div>
+        <button class="btn-entrar" onclick="activar()">ACCEDER A LA APP</button>
+    </div>
+
+    <div id="screen-loading" class="screen"></div>
+
+    <div id="screen-options" class="screen">
+        <button class="tap-zone" style="top: 38%;" onclick="irDNI()"></button>
+        <button class="tap-zone" style="top: 51%;" onclick="irDNI()"></button>
+        <button class="tap-zone" style="top: 64%;" onclick="irDNI()"></button>
+    </div>
+
+    <div id="screen-dni" class="screen">
+        <div class="capa-foto"><img id="out-foto"></div>
+        <div class="capa-texto" id="out-dni"></div>
+        <div class="capa-texto" id="out-ape"></div>
+        <div class="capa-texto" id="out-nom"></div>
+        <div class="capa-texto" id="out-nac"></div>
+    </div>
+
+</div>
+
+<script>
+    // Función para navegar entre pantallas
+    function nav(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // Cargar datos guardados si existen
+    window.onload = () => {
+        const d = JSON.parse(localStorage.getItem('midni_cache'));
+        if(d) {
+            document.getElementById('in-nom').value = d.n;
+            document.getElementById('in-ape').value = d.a;
+            document.getElementById('in-dni').value = d.d;
+            document.getElementById('in-nac').value = d.f;
+        }
+    };
+
+    function activar() {
+        const f = document.getElementById('in-foto').files[0];
+        if(!f && !document.getElementById('out-foto').src) {
+            alert("Sube una foto jefe");
+            return;
+        }
+
+        // Guardar en memoria
+        const datos = {
+            n: document.getElementById('in-nom').value,
+            a: document.getElementById('in-ape').value,
+            d: document.getElementById('in-dni').value,
+            f: document.getElementById('in-nac').value
+        };
+        localStorage.setItem('midni_cache', JSON.stringify(datos));
+
+        // Pintar en el DNI
+        document.getElementById('out-nom').innerText = datos.n.toUpperCase();
+        document.getElementById('out-ape').innerText = datos.a.toUpperCase();
+        document.getElementById('out-dni').innerText = datos.d.toUpperCase();
+        document.getElementById('out-nac').innerText = datos.f;
+
+        if(f) {
+            const r = new FileReader();
+            r.onload = (e) => {
+                document.getElementById('out-foto').src = e.target.result;
+                lanzarCarga('screen-options', 1500);
+            };
+            r.readAsDataURL(f);
+        } else {
+            lanzarCarga('screen-options', 1500);
+        }
+    }
+
+    function lanzarCarga(destino, tiempo) {
+        nav('screen-loading');
+        setTimeout(() => nav(destino), tiempo);
+    }
+
+    function irDNI() {
+        lanzarCarga('screen-dni', 800);
+    }
+</script>
+</body>
+</html>
