@@ -7,46 +7,30 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, Helvetica, Arial, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: #000; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         .phone { width: 100%; max-width: 414px; height: 100vh; background: #fff; position: relative; }
 
         .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; }
         .active { display: block !important; }
 
-        /* PANTALLA 1: FORMULARIO */
+        /* Pantalla 1: Formulario */
         #sc-setup { display: block; background: #f2f2f7; padding: 50px 20px; z-index: 100; overflow-y: auto; }
         .card { background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #d1d1d6; border-radius: 10px; font-size: 16px; }
-        .btn-entrar { background: #1a2b4e; color: #fff; width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; }
+        .btn-entrar { background: #1a2b4e; color: #fff; width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; -webkit-tap-highlight-color: transparent; }
 
-        /* PANTALLA 2: CARGA (IMG_2080.jpeg) */
+        /* Fondos Locales */
         #sc-loading { background-image: url('IMG_2080.jpeg'); background-color: #fff; }
-
-        /* PANTALLA 3: MENÚ (IMG_2082.jpeg) */
         #sc-options { background-image: url('IMG_2082.jpeg'); }
-        .btn-inv { position: absolute; width: 85%; left: 7.5%; height: 12%; background: transparent; border: none; cursor: pointer; }
-        .opt-1 { top: 54%; } .opt-2 { top: 68.5%; } .opt-3 { top: 83%; }
-
-        /* PANTALLA 4: DNI FINAL (IMG_2093.jpeg - Imagen Limpia) */
         #sc-dni { background-image: url('IMG_2093.jpeg'); }
-        
-        /* Contenedor de Foto de Usuario */
-        .u-foto { position: absolute; top: 21.5%; left: 8.5%; width: 33.5%; height: 23%; overflow: hidden; background: #fff; }
+
+        .btn-inv { position: absolute; width: 85%; left: 7.5%; height: 12%; background: transparent; border: none; }
+        .u-foto { position: absolute; top: 21.3%; left: 8.5%; width: 33.5%; height: 23%; overflow: hidden; background: #fff; }
         .u-foto img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Textos sobre el DNI (Caligrafía y Color miDNI) */
-        .u-txt { 
-            position: absolute; 
-            color: #1a2b4e; 
-            font-weight: 500; 
-            font-size: 22px; 
-            letter-spacing: 0.5px;
-            pointer-events: none;
-            text-transform: uppercase;
-        }
-
-        /* Posiciones exactas sobre IMG_2093.jpeg */
+        /* Ajuste de Texto (Color y fuente similar a la captura) */
+        .u-txt { position: absolute; color: #1a2b4e; font-weight: 500; font-size: 21px; pointer-events: none; text-transform: uppercase; letter-spacing: 0.3px; }
         #r-dni { top: 57.5%; left: 8.5%; }
         #r-ape { top: 64.8%; left: 8.5%; }
         #r-nom { top: 72.2%; left: 8.5%; }
@@ -63,17 +47,17 @@
             <input type="text" id="i-nom" placeholder="NOMBRE">
             <input type="text" id="i-ape" placeholder="APELLIDOS">
             <input type="text" id="i-dni" placeholder="DNI">
-            <input type="text" id="i-nac" placeholder="NACIMIENTO (DD/MM/AAAA)" value="03 / 09 / 2001">
-            <button class="btn-entrar" onclick="iniciar()">ACCEDER</button>
+            <input type="text" id="i-nac" placeholder="FECHA NACIMIENTO" value="03 / 09 / 2001">
+            <button class="btn-entrar" onclick="ejecutar()">ACCEDER</button>
         </div>
     </div>
 
     <div id="sc-loading" class="screen"></div>
 
     <div id="sc-options" class="screen">
-        <button class="btn-inv opt-1" onclick="irDNI()"></button>
-        <button class="btn-inv opt-2" onclick="irDNI()"></button>
-        <button class="btn-inv opt-3" onclick="irDNI()"></button>
+        <button class="btn-inv" style="top:54%" onclick="irDNI()"></button>
+        <button class="btn-inv" style="top:68%" onclick="irDNI()"></button>
+        <button class="btn-inv" style="top:83%" onclick="irDNI()"></button>
     </div>
 
     <div id="sc-dni" class="screen">
@@ -87,37 +71,44 @@
 
 <script>
     function nav(id) {
-        ['sc-setup', 'sc-loading', 'sc-options', 'sc-dni'].forEach(p => {
-            document.getElementById(p).style.display = 'none';
-        });
+        const screens = ['sc-setup', 'sc-loading', 'sc-options', 'sc-dni'];
+        screens.forEach(s => document.getElementById(s).style.display = 'none');
         document.getElementById(id).style.display = 'block';
     }
 
-    function iniciar() {
+    function ejecutar() {
         const file = document.getElementById('i-foto').files[0];
-        if (!file) return alert("Por favor, selecciona una foto.");
+        
+        // PASO 1: Navegar a carga inmediatamente (evita bloqueo visual)
+        nav('sc-loading');
 
-        // Rellenar datos
+        // PASO 2: Rellenar textos
         document.getElementById('r-nom').innerText = document.getElementById('i-nom').value;
         document.getElementById('r-ape').innerText = document.getElementById('i-ape').value;
         document.getElementById('r-dni').innerText = document.getElementById('i-dni').value;
         document.getElementById('r-nac').innerText = document.getElementById('i-nac').value;
 
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('r-foto').src = e.target.result;
-            // Secuencia: Carga -> Menú
-            nav('sc-loading');
-            setTimeout(() => nav('sc-options'), 1500);
-        };
-        reader.readAsDataURL(file);
+        // PASO 3: Procesar foto si existe
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('r-foto').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // PASO 4: Salto al menú tras la carga
+        setTimeout(() => {
+            nav('sc-options');
+        }, 1500);
     }
 
     function irDNI() {
         nav('sc-loading');
-        setTimeout(() => nav('sc-dni'), 800);
+        setTimeout(() => {
+            nav('sc-dni');
+        }, 800);
     }
 </script>
-
 </body>
 </html>
