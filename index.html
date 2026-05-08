@@ -5,29 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>miDNI Pro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: #000; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         .phone { width: 100%; max-width: 414px; height: 100vh; background: #fff; position: relative; }
 
-        .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: 100% 100%; background-position: center; }
+        /* Pantallas */
+        .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; }
         .active { display: block !important; }
 
-        /* Pantalla 1: Formulario */
-        #sc-setup { display: block; background: #f2f2f7; padding: 50px 20px; z-index: 100; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        /* 1. FORMULARIO (Setup) */
+        #sc-setup { display: block; background: #f2f2f7; padding: 50px 20px; z-index: 100; overflow-y: auto; }
+        .card { background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #d1d1d6; border-radius: 10px; font-size: 16px; -webkit-appearance: none; }
         .btn-entrar { background: #1a2b4e; color: #fff; width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; }
 
-        /* Pantalla 2: Carga */
-        #sc-loading { background-image: url('https://files.oaiusercontent.com/file-ea79148d-d82b-48df-bfc8-e536f32225b2'); background-color: #fff; }
+        /* 2. CARGA (IMG_2080.jpeg) */
+        #sc-loading { background-image: url('IMG_2080.jpeg'); background-color: #fff; }
 
-        /* Pantalla 3: Opciones */
-        #sc-options { background-image: url('https://files.oaiusercontent.com/file-9ddf0b2d-8e95-4122-9c69-9a21836a8aef'); }
-        .btn-inv { position: absolute; width: 85%; left: 7.5%; height: 12%; background: rgba(0,0,0,0); border: none; }
+        /* 3. MENÚ/OPCIONES (IMG_2082.jpeg) */
+        #sc-options { background-image: url('IMG_2082.jpeg'); }
+        .btn-inv { position: absolute; width: 85%; left: 7.5%; height: 12%; background: rgba(0,0,0,0); border: none; cursor: pointer; }
+        .opt-1 { top: 54%; }
+        .opt-2 { top: 68.5%; }
+        .opt-3 { top: 83%; }
 
-        /* Pantalla 4: DNI */
+        /* 4. DNI FINAL (Esta la seguimos cargando de URL o si la subes llámala dni.jpg) */
         #sc-dni { background-image: url('https://files.oaiusercontent.com/file-0ca121b2-7247-40d3-84c7-8d0c9a8ef62e'); }
-        .u-foto { position: absolute; top: 15.3%; left: 8.5%; width: 27%; height: 18.5%; background: #eee; }
+        
+        .u-foto { position: absolute; top: 15.3%; left: 8.5%; width: 27%; height: 18.5%; overflow: hidden; background: #eee; }
         .u-foto img { width: 100%; height: 100%; object-fit: cover; }
         .u-txt { position: absolute; color: #1a2b4e; font-weight: 700; font-size: 17px; pointer-events: none; text-transform: uppercase; }
     </style>
@@ -36,21 +43,22 @@
 
 <div class="phone">
     <div id="sc-setup" class="screen active">
-        <div style="background:#fff; padding:20px; border-radius:15px;">
+        <div class="card">
+            <h2 style="margin-bottom:15px; color:#1a2b4e;">miDNI Setup</h2>
             <input type="file" id="i-foto" accept="image/*">
             <input type="text" id="i-nom" placeholder="NOMBRE">
             <input type="text" id="i-ape" placeholder="APELLIDOS">
             <input type="text" id="i-dni" placeholder="DNI">
-            <button class="btn-entrar" onclick="procesar()">ENTRAR</button>
+            <button class="btn-entrar" onclick="iniciarApp()">ENTRAR</button>
         </div>
     </div>
 
     <div id="sc-loading" class="screen"></div>
 
     <div id="sc-options" class="screen">
-        <button class="btn-inv" style="top:54%" onclick="irFin()"></button>
-        <button class="btn-inv" style="top:68%" onclick="irFin()"></button>
-        <button class="btn-inv" style="top:83%" onclick="irFin()"></button>
+        <button class="btn-inv opt-1" onclick="irAlDNI()"></button>
+        <button class="btn-inv opt-2" onclick="irAlDNI()"></button>
+        <button class="btn-inv opt-3" onclick="irAlDNI()"></button>
     </div>
 
     <div id="sc-dni" class="screen">
@@ -62,45 +70,38 @@
 </div>
 
 <script>
-    function navega(id) {
-        // Forzamos el cambio ocultando y mostrando por ID directo
-        document.getElementById('sc-setup').style.display = 'none';
-        document.getElementById('sc-loading').style.display = 'none';
-        document.getElementById('sc-options').style.display = 'none';
-        document.getElementById('sc-dni').style.display = 'none';
-        
+    function nav(id) {
+        const pantallas = ['sc-setup', 'sc-loading', 'sc-options', 'sc-dni'];
+        pantallas.forEach(p => document.getElementById(p).style.display = 'none');
         document.getElementById(id).style.display = 'block';
     }
 
-    function procesar() {
+    function iniciarApp() {
         const file = document.getElementById('i-foto').files[0];
         
-        // Pasamos los textos primero
+        // Asignar textos
         document.getElementById('r-nom').innerText = document.getElementById('i-nom').value;
         document.getElementById('r-ape').innerText = document.getElementById('i-ape').value;
         document.getElementById('r-dni').innerText = document.getElementById('i-dni').value;
 
-        // Si hay foto, la leemos, si no, saltamos igual para que no se quede en blanco
+        // Cargar foto de usuario
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('r-foto').src = e.target.result;
-            };
+            reader.onload = e => document.getElementById('r-foto').src = e.target.result;
             reader.readAsDataURL(file);
         }
 
-        // LANZAR CARGA SI O SI
-        navega('sc-loading');
-        
+        // Secuencia: Carga -> Menú
+        nav('sc-loading');
         setTimeout(() => {
-            navega('sc-options');
-        }, 1500);
+            nav('sc-options');
+        }, 1500); // 1.5 segundos
     }
 
-    function irFin() {
-        navega('sc-loading');
+    function irAlDNI() {
+        nav('sc-loading');
         setTimeout(() => {
-            navega('sc-dni');
+            nav('sc-dni');
         }, 800);
     }
 </script>
